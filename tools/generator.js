@@ -82,16 +82,15 @@ function Generator () {
           problem = problem + ' '
           problem += getSmallRandomNumber()
         } else {
+          problem = problem + ' '
           if (Plen > 1) {
             if (Math.random() > 0.8) {
-              problem = problem + ' '
               problem += '('
               bracketflag = 1
               numflag++
               block = 1
             }
           }
-          problem = problem + ' '
           problem += getRandomNumber()
         }
         if (bracketflag) {
