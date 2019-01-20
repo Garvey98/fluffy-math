@@ -109,7 +109,7 @@
   - 把程序变成一个网页程序，让用户设定参数得到各种题目
   - 选一个从未接触的编程语言（Javascript）并试一试实现基本功能
 
-下面我将对我开发实现的模块（题目求解和前端框架搭建）进行介绍。
+下面我将对我开发实现的模块（题目生成和前端嵌入）进行介绍。
 
 ## IV. 生成题目思路
 
@@ -142,7 +142,136 @@
 
 ## VI. 性能改进
 
+[![Codacy Badge](https://img.shields.io/codacy/coverage/ebf8f648a65a4e3a86f93b50d7fd6dce.svg)](https://www.codacy.com/app/spencerwooo/fluffy-math?utm_source=github.com&utm_medium=referral&utm_content=spencerwooo/fluffy-math&utm_campaign=Badge_Coverage)
+
 ## VII. 代码细节
+
+### 运算数字和运算符的生成
+
+``` javascript
+/** @function
+ * @name getRandomNumber - 生成 0 到 100 的随机数
+ */
+function getRandomNumber () {
+  return Math.floor(Math.random() * 101)
+}
+
+/** @function
+ * @name getRandomNumber - 生成随机数
+ */
+function getSmallRandomNumber () {
+  return Math.floor(Math.random() * 10)
+}
+
+/** @function
+ * @name getRandomOperator - 生成随机的运算符号
+ */
+function getRandomOperator () {
+  let operators = ['+', '-', '*', '÷', '^', '**']
+  let randomoperator = Math.random()
+  if (randomoperator > 0.7) {
+    return operators[0]
+  } else if (randomoperator > 0.4) {
+    return operators[1]
+  } else if (randomoperator > 0.15) {
+    return operators[2]
+  } else if (randomoperator > 0.05) {
+    return operators[3]
+  } else if (randomoperator > 0.025) {
+    return operators[4]
+  } else {
+    return operators[5]
+  }
+}
+```
+
+### 生成实现
+
+``` javascript
+/** @class
+ * @name Generator - 生成随机四则运算计算题
+ */
+function Generator () {
+  /** @function
+   * @name generate - 生成计算题
+   * @param {int} - 生成的题目数量
+   */
+  this.generate = function (problemNum) {
+    // console.log('Hello generator!')
+    let problemList = []
+    let bracketflag = 0 // 能不能加右括号
+    let numflag = 0 // 缺少的右括号个数
+    let block = 0 // 避免（3）这种情况
+    let tmp = '' // 存储运算符，进行运算类型判断，以约束运算数
+    while (problemNum--) {
+      bracketflag = 0
+      numflag = 0
+      block = 0
+      let end = 0
+      let start = 0
+      let Plen = Math.floor(Math.random() * 10) + 1
+      let problem = getRandomNumber()
+      while (Plen--) {
+        block = 0
+        problem = problem + ' '
+        tmp = getRandomOperator()
+        problem = problem + tmp
+        if (tmp === '**' || tmp === '^') {
+          end = problem.length
+          start = end - 3
+          while (start) {
+            if (start === 1) {
+              problem = problem.substring(0, start) + ' '
+              problem = problem + tmp
+              break
+            }
+            if ((problem[start] >= '0' && problem[start] <= '9') || problem[start] === ')' || problem[start] === ' ') {
+              if (problem[start] === ')') {
+                numflag++
+              }
+              problem = problem.substring(0, start + 2) + ' '
+              problem = problem + tmp
+              start--
+            } else break
+          }
+          problem = problem + ' '
+          problem += getSmallRandomNumber()
+        } else {
+          problem = problem + ' '
+          if (Plen > 1) {
+            if (Math.random() > 0.8) {
+              problem += '('
+              bracketflag = 1
+              numflag++
+              block = 1
+            }
+          }
+          problem += getRandomNumber()
+        }
+        if (bracketflag) {
+          if (Math.random() > 0.7) {
+            if (!block) {
+              problem = problem + ' '
+              problem += ')'
+              bracketflag = 0
+              numflag -= 1
+            }
+          }
+        }
+      }
+      while (numflag > 0) {
+        problem = problem + ' '
+        problem += ')'
+        numflag--
+      }
+      problemList.push(problem)
+    }
+    return problemList
+  }
+}
+
+module.exports = Generator
+```
 
 ## VIII. 项目总结
 
